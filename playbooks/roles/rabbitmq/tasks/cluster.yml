@@ -1,0 +1,27 @@
+---
+
+- name: Check if node is clustered
+  stat:
+    path: /etc/rabbitmq/.clustered
+  register: rabbitmq_clustered
+  changed_when: False
+
+- name: App is stopped
+  shell: rabbitmqctl stop_app
+  when: not rabbitmq_clustered.stat.exists
+
+- name: Join cluster
+  shell: "rabbitmqctl join_cluster rabbit@{{ hostvars[groups['rabbitmq'][0]]['inventory_hostname'] }}"
+  when: not rabbitmq_clustered.stat.exists
+
+- name: App is started
+  shell: rabbitmqctl start_app
+  when: not rabbitmq_clustered.stat.exists
+
+- name: Node is marked as clustered
+  file:
+    path: /etc/rabbitmq/.clustered
+    owner: root
+    group: root
+    state: touch
+  when: not rabbitmq_clustered.stat.exists

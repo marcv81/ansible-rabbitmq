@@ -1,0 +1,35 @@
+---
+
+- name: Packages list is up to date
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: RabbitMQ is installed
+  apt:
+    name: rabbitmq-server
+    state: present
+
+- name: Hostnames are configured
+  lineinfile:
+    dest: /etc/hosts
+    line: "{{hostvars[item].ansible_ssh_host}} {{hostvars[item].ansible_hostname}}"
+    regexp: " {{hostvars[item].ansible_hostname}}$"
+    state: present
+  with_items: "{{groups.rabbitmq}}"
+
+- include: erlang_cookie.yml
+
+- name: Service is started
+  service:
+    name: rabbitmq-server
+    state: started
+    enabled: yes
+
+- name: Management plugin is enabled
+  rabbitmq_plugin:
+    names: rabbitmq_management
+    state: enabled
+  notify: Restart RabbitMQ
+
+- meta: flush_handlers

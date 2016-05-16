@@ -1,0 +1,21 @@
+---
+
+- name: Read Erlang cookies
+  command: cat /var/lib/rabbitmq/.erlang.cookie
+  register: erlang_cookie
+  changed_when: False
+
+- name: Register Erlang cookies
+  set_fact:
+    local_erlang_cookie: "{{erlang_cookie.stdout}}"
+    global_erlang_cookie: "{{hostvars[groups['rabbitmq'][0]].erlang_cookie.stdout}}"
+
+- name: Service is stopped
+  service:
+    name: rabbitmq-server
+    state: stopped
+  when: local_erlang_cookie != global_erlang_cookie
+
+- name: Erlang cookies match
+  shell: printf {{global_erlang_cookie}} > /var/lib/rabbitmq/.erlang.cookie
+  when: local_erlang_cookie != global_erlang_cookie

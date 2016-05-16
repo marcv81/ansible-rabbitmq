@@ -1,0 +1,9 @@
+---
+
+- include: install.yml
+
+- include: cluster.yml
+  when: inventory_hostname != hostvars[groups['rabbitmq'][0]]['inventory_hostname']
+
+- include: users.yml
+  when: inventory_hostname == hostvars[groups['rabbitmq'][0]]['inventory_hostname']
