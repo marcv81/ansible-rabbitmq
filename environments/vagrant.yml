@@ -2,11 +2,11 @@
 
 hosts:
   rabbit-01:
-    box: ubuntu/wily64
+    box: marcv81/xenial64
     ip: 192.168.56.91
     memory: 1024
   rabbit-02:
-    box: ubuntu/wily64
+    box: marcv81/xenial64
     ip: 192.168.56.92
     memory: 1024
 
